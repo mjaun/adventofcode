@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import sys
+from typing import List
 
-from typing import List, Tuple
+from day4_part1 import read_input_pairs
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
         first_elf = Elf(first_range)
         second_elf = Elf(second_range)
 
-        if Elf.fully_contains_sections(first_elf, second_elf):
+        if Elf.have_overlapping_sections(first_elf, second_elf):
             result += 1
 
     print(result)
@@ -27,21 +27,9 @@ class Elf:
         self.section_ids: List[int] = list(range(section_range_ids[0], section_range_ids[1] + 1))
 
     @staticmethod
-    def fully_contains_sections(first: Elf, second: Elf):
+    def have_overlapping_sections(first: Elf, second: Elf):
         common_sections = set(first.section_ids) & set(second.section_ids)
-        return len(common_sections) in [len(first.section_ids), len(second.section_ids)]
-
-
-def read_input_pairs() -> List[Tuple[str, str]]:
-    pairs: List[Tuple[str, str]] = []
-
-    for line in sys.stdin.readlines():
-        line = line.strip()
-        pair = line.split(',')
-        assert len(pair) == 2
-        pairs.append((pair[0], pair[1]))
-
-    return pairs
+        return len(common_sections) > 0
 
 
 if __name__ == '__main__':
