@@ -4,30 +4,19 @@ from typing import List, Iterable
 
 
 def main():
-    elves: List[Elf] = []
-
-    for input_group in read_input_groups():
-        elves.append(Elf(int(x) for x in input_group))
+    elves = [Elf(input_lines) for input_lines in read_input_groups()]
 
     elf_with_most_snacks = max(elves, key=lambda elf: elf.total_snacks())
+
     print(elf_with_most_snacks.total_snacks())
 
 
 class Elf:
-    def __init__(self, snacks: Iterable[int]):
-        self.snacks = list(snacks)
+    def __init__(self, input_lines: List[str]):
+        self.snacks = [int(line) for line in input_lines]
 
     def total_snacks(self) -> int:
         return sum(self.snacks)
-
-
-def initialize_elves() -> List[Elf]:
-    elves: List[Elf] = []
-
-    for input_group in read_input_groups():
-        elves.append(Elf(int(x) for x in input_group))
-
-    return elves
 
 
 def read_input_groups() -> List[List[str]]:
