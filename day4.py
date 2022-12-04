@@ -6,16 +6,21 @@ from typing import List, Tuple
 
 
 def main():
-    result = 0
+    result_part_one = 0
+    result_part_two = 0
 
     for first_range, second_range in read_input_pairs():
         first_elf = Elf(first_range)
         second_elf = Elf(second_range)
 
         if Elf.fully_contains_sections(first_elf, second_elf):
-            result += 1
+            result_part_one += 1
 
-    print(result)
+        if Elf.have_overlapping_sections(first_elf, second_elf):
+            result_part_two += 1
+
+    print(result_part_one)
+    print(result_part_two)
 
 
 class Elf:
@@ -30,6 +35,11 @@ class Elf:
     def fully_contains_sections(first: Elf, second: Elf):
         common_sections = set(first.section_ids) & set(second.section_ids)
         return len(common_sections) in [len(first.section_ids), len(second.section_ids)]
+
+    @staticmethod
+    def have_overlapping_sections(first: Elf, second: Elf):
+        common_sections = set(first.section_ids) & set(second.section_ids)
+        return len(common_sections) > 0
 
 
 def read_input_pairs() -> List[Tuple[str, str]]:

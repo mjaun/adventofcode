@@ -1,22 +1,44 @@
 from __future__ import annotations
 
-from enum import IntEnum
+import sys
 
-from day2_part1 import read_input_pairs
+from enum import IntEnum
+from typing import List, Tuple
 
 
 def main():
+    input_pairs = read_input_pairs()
+
+    # part one
     total_score = 0
 
-    for opponent_key, result_key in read_input_pairs():
+    for opponent_key, player_key in input_pairs:
+        player_choice = RockPaperScissorChoice.from_encrypted_strategy_guide(player_key)
+        opponent_choice = RockPaperScissorChoice.from_encrypted_strategy_guide(opponent_key)
+        total_score += play_round(player_choice, opponent_choice)
+
+    print(total_score)
+
+    # part two
+    total_score = 0
+
+    for opponent_key, result_key in input_pairs:
         opponent_choice = RockPaperScissorChoice.from_encrypted_strategy_guide(opponent_key)
         round_result = RoundResult.from_encrypted_strategy_guide(result_key)
 
         player_choice = opponent_choice.find_choice_to(round_result)
-        print(f'{opponent_key} {result_key} -> {opponent_choice} {player_choice}')
         total_score += get_round_score(player_choice, round_result)
 
     print(total_score)
+
+
+def play_round(player_choice: RockPaperScissorChoice, opponent_choice: RockPaperScissorChoice) -> int:
+    if player_choice.wins_against(opponent_choice):
+        return get_round_score(player_choice, RoundResult.WIN)
+    elif player_choice == opponent_choice:
+        return get_round_score(player_choice, RoundResult.DRAW)
+    else:
+        return get_round_score(player_choice, RoundResult.LOSS)
 
 
 def get_round_score(player_choice: RockPaperScissorChoice, round_result: RoundResult) -> int:
@@ -52,9 +74,17 @@ class RockPaperScissorChoice(IntEnum):
             'A': RockPaperScissorChoice.ROCK,
             'B': RockPaperScissorChoice.PAPER,
             'C': RockPaperScissorChoice.SCISSOR,
+
+            # for part one only
+            'X': RockPaperScissorChoice.ROCK,
+            'Y': RockPaperScissorChoice.PAPER,
+            'Z': RockPaperScissorChoice.SCISSOR,
         }
 
         return key_table[key]
+
+    def wins_against(self, other: RockPaperScissorChoice):
+        return self == other.find_choice_to(RoundResult.WIN)
 
     def find_choice_to(self, result: RoundResult):
         lookup_table = {
@@ -76,6 +106,18 @@ class RockPaperScissorChoice(IntEnum):
         }
 
         return lookup_table[result][self]
+
+
+def read_input_pairs() -> List[Tuple[str, str]]:
+    pairs: List[Tuple[str, str]] = []
+
+    for line in sys.stdin.readlines():
+        line = line.strip()
+        pair = line.split()
+        assert len(pair) == 2
+        pairs.append((pair[0], pair[1]))
+
+    return pairs
 
 
 if __name__ == '__main__':

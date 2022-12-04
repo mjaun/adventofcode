@@ -1,14 +1,19 @@
 import sys
 
-from typing import List, Iterable
+from typing import List
 
 
 def main():
     elves = [Elf(input_lines) for input_lines in read_input_groups()]
 
+    # part one
     elf_with_most_snacks = max(elves, key=lambda elf: elf.total_snacks())
-
     print(elf_with_most_snacks.total_snacks())
+
+    # part two
+    elves.sort(key=lambda elf: elf.total_snacks())
+    top_three_elves = elves[-3:]
+    print(sum(elf.total_snacks() for elf in top_three_elves))
 
 
 class Elf:
