@@ -21,6 +21,15 @@ class Elf:
         return sum(self.snacks)
 
 
+def initialize_elves() -> List[Elf]:
+    elves: List[Elf] = []
+
+    for input_group in read_input_groups():
+        elves.append(Elf(int(x) for x in input_group))
+
+    return elves
+
+
 def read_input_groups() -> List[List[str]]:
     groups: List[List[str]] = []
     current_group: List[str] = []
