@@ -9,7 +9,7 @@ def main():
     priority_sum = 0
 
     for rucksack in rucksacks:
-        for common_item in rucksack.get_items_in_both_departments():
+        for common_item in rucksack.get_common_items_in_both_departments():
             priority_sum += common_item.priority()
 
     print(priority_sum)
@@ -23,7 +23,7 @@ class Rucksack:
         self.compartment1 = [Item(key) for key in input_line[:middle_index]]
         self.compartment2 = [Item(key) for key in input_line[middle_index:]]
 
-    def get_items_in_both_departments(self) -> Set[Item]:
+    def get_common_items_in_both_departments(self) -> Set[Item]:
         return set(self.compartment1) & set(self.compartment2)
 
 
