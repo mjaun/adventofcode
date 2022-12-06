@@ -15,7 +15,9 @@ def main():
     for opponent_key, player_key in input_pairs:
         player_choice = RockPaperScissorChoice.from_encrypted_strategy_guide(player_key)
         opponent_choice = RockPaperScissorChoice.from_encrypted_strategy_guide(opponent_key)
-        total_score += play_round(player_choice, opponent_choice)
+
+        round_result = get_round_result(player_choice, opponent_choice)
+        total_score += get_round_score(player_choice, round_result)
 
     print(total_score)
 
@@ -26,25 +28,46 @@ def main():
         opponent_choice = RockPaperScissorChoice.from_encrypted_strategy_guide(opponent_key)
         round_result = RoundResult.from_encrypted_strategy_guide(result_key)
 
-        player_choice = opponent_choice.find_choice_to(round_result)
+        player_choice = find_choice(opponent_choice, round_result)
         total_score += get_round_score(player_choice, round_result)
 
     print(total_score)
 
 
-def play_round(player_choice: RockPaperScissorChoice, opponent_choice: RockPaperScissorChoice) -> int:
-    if player_choice.wins_against(opponent_choice):
-        return get_round_score(player_choice, RoundResult.WIN)
+def get_round_result(player_choice: RockPaperScissorChoice, opponent_choice: RockPaperScissorChoice) -> int:
+    if player_choice == find_choice(opponent_choice, RoundResult.WIN):
+        return RoundResult.WIN
     elif player_choice == opponent_choice:
-        return get_round_score(player_choice, RoundResult.DRAW)
+        return RoundResult.DRAW
     else:
-        return get_round_score(player_choice, RoundResult.LOSS)
+        return RoundResult.LOSS
 
 
 def get_round_score(player_choice: RockPaperScissorChoice, round_result: RoundResult) -> int:
     choice_score = int(player_choice)
     round_score = int(round_result)
     return round_score + choice_score
+
+def find_choice(opponent_choice: RockPaperScissorChoice, result: RoundResult):
+    lookup_table = {
+        RoundResult.WIN: {
+            RockPaperScissorChoice.ROCK: RockPaperScissorChoice.PAPER,
+            RockPaperScissorChoice.PAPER: RockPaperScissorChoice.SCISSOR,
+            RockPaperScissorChoice.SCISSOR: RockPaperScissorChoice.ROCK,
+        },
+        RoundResult.DRAW: {
+            RockPaperScissorChoice.ROCK: RockPaperScissorChoice.ROCK,
+            RockPaperScissorChoice.PAPER: RockPaperScissorChoice.PAPER,
+            RockPaperScissorChoice.SCISSOR: RockPaperScissorChoice.SCISSOR,
+        },
+        RoundResult.LOSS: {
+            RockPaperScissorChoice.ROCK: RockPaperScissorChoice.SCISSOR,
+            RockPaperScissorChoice.PAPER: RockPaperScissorChoice.ROCK,
+            RockPaperScissorChoice.SCISSOR: RockPaperScissorChoice.PAPER,
+        },
+    }
+
+    return lookup_table[result][opponent_choice]
 
 
 class RoundResult(IntEnum):
@@ -82,30 +105,6 @@ class RockPaperScissorChoice(IntEnum):
         }
 
         return key_table[key]
-
-    def wins_against(self, other: RockPaperScissorChoice):
-        return self == other.find_choice_to(RoundResult.WIN)
-
-    def find_choice_to(self, result: RoundResult):
-        lookup_table = {
-            RoundResult.WIN: {
-                RockPaperScissorChoice.ROCK: RockPaperScissorChoice.PAPER,
-                RockPaperScissorChoice.PAPER: RockPaperScissorChoice.SCISSOR,
-                RockPaperScissorChoice.SCISSOR: RockPaperScissorChoice.ROCK,
-            },
-            RoundResult.DRAW: {
-                RockPaperScissorChoice.ROCK: RockPaperScissorChoice.ROCK,
-                RockPaperScissorChoice.PAPER: RockPaperScissorChoice.PAPER,
-                RockPaperScissorChoice.SCISSOR: RockPaperScissorChoice.SCISSOR,
-            },
-            RoundResult.LOSS: {
-                RockPaperScissorChoice.ROCK: RockPaperScissorChoice.SCISSOR,
-                RockPaperScissorChoice.PAPER: RockPaperScissorChoice.ROCK,
-                RockPaperScissorChoice.SCISSOR: RockPaperScissorChoice.PAPER,
-            },
-        }
-
-        return lookup_table[result][self]
 
 
 def read_input_pairs() -> List[Tuple[str, str]]:
