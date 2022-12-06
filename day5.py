@@ -8,7 +8,18 @@ from typing import List, Tuple
 
 def main():
     initial_state, instructions = read_input_sections()
+
+    # part one
     cargo_depot = CargoDepot(initial_state)
+
+    for instruction in instructions:
+        cargo_depot.execute_instruction(instruction)
+
+    print(cargo_depot.get_top_crates_encoded())
+
+    # part two
+    cargo_depot = CargoDepot(initial_state)
+    cargo_depot.crane_moves_crates_in_order = True
 
     for instruction in instructions:
         cargo_depot.execute_instruction(instruction)
@@ -19,6 +30,7 @@ def main():
 class CargoDepot:
     def __init__(self, initial_state: List[str]):
         self.stacks: List[List[Crate]] = []
+        self.crane_moves_crates_in_order = False
 
         for line in reversed(initial_state):
             crate_keys = [line[i] for i in range(1, len(line), 4)]
@@ -42,8 +54,12 @@ class CargoDepot:
         assert len(self.stacks[from_stack_id]) >= move_count
 
         moved_crates = self.stacks[from_stack_id][-move_count:]
+
+        if not self.crane_moves_crates_in_order:
+            moved_crates.reverse()
+
         del self.stacks[from_stack_id][-move_count:]
-        self.stacks[to_stack_id].extend(reversed(moved_crates))
+        self.stacks[to_stack_id].extend(moved_crates)
 
     def put_crate(self, crate: Crate, stack_id: int):
         self.extend_stacks(stack_id)
