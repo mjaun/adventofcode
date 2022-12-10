@@ -7,25 +7,62 @@ from typing import List, Tuple, Set
 
 
 def main():
-    rope = Rope()
+    input_list = read_input()
+
+    # part one
+    rope = Rope(knot_count=2)
     tail_positions: Set[Position] = set()
 
-    for direction, distance in read_input():
+    for direction, distance in input_list:
         for _ in range(distance):
-            rope.move_head(direction)
-            tail_positions.add(rope.tail_pos)
+            rope.move_direction(direction)
+            tail_positions.add(rope.tail_position())
+
+    print(len(tail_positions))
+
+    # part two
+    rope = Rope(knot_count=10)
+    tail_positions: Set[Position] = set()
+
+    for direction, distance in input_list:
+        for _ in range(distance):
+            rope.move_direction(direction)
+            tail_positions.add(rope.tail_position())
 
     print(len(tail_positions))
 
 
 class Rope:
+    def __init__(self, knot_count: int):
+        assert knot_count >= 2
+        self.knot_pairs = [KnotPair() for _ in range(knot_count - 1)]
+
+    def move_direction(self, direction: Direction):
+        self.knot_pairs[0].move_direction(direction)
+        self._tail_catch_up()
+
+    def tail_position(self) -> Position:
+        return self.knot_pairs[-1].tail_pos
+
+    def _tail_catch_up(self):
+        for i in range(1, len(self.knot_pairs)):
+            previous_tail_position = self.knot_pairs[i - 1].tail_pos
+            self.knot_pairs[i].move_position(previous_tail_position)
+
+
+class KnotPair:
     def __init__(self):
         self.head_pos = Position(0, 0)
         self.tail_pos = Position(0, 0)
 
-    def move_head(self, direction: Direction):
+    def move_direction(self, direction: Direction):
         self.head_pos = self.head_pos.next_in_direction(direction)
         self._tail_catch_up()
+
+    def move_position(self, position: Position):
+        self.head_pos = position
+        while self._tail_catch_up():
+            pass
 
     def _tail_catch_up(self):
         delta = self.head_pos - self.tail_pos
@@ -33,6 +70,9 @@ class Rope:
         if abs(delta.x) > 1 or abs(delta.y) > 1:
             head_direction = self.tail_pos.direction_to(self.head_pos)
             self.tail_pos = self.tail_pos.next_in_direction(head_direction)
+            return True
+
+        return False
 
 
 class Position:
