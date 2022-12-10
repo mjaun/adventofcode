@@ -14,15 +14,19 @@ def main():
         parser.process_line(input_line)
     parser.finish_command()
 
-    result = 0
+    # part one
+    all_directories = file_system.root_directory.iterate_subdirectories_recursively()
+    print(sum(d.get_total_size() for d in all_directories if d.get_total_size() <= 100000))
 
-    for directory in file_system.root_directory.iterate_subdirectories_recursively():
-        directory_size = directory.get_total_size()
+    # part two
+    total_space = 70000000
+    space_needed = 30000000
+    space_used = file_system.root_directory.get_total_size()
+    space_to_free = space_used + space_needed - total_space
+    assert space_to_free > 0
 
-        if directory.get_total_size() <= 100000:
-            result += directory_size
-
-    print(result)
+    all_directories = file_system.root_directory.iterate_subdirectories_recursively()
+    print(min(d.get_total_size() for d in all_directories if d.get_total_size() >= space_to_free))
 
 
 class File:
