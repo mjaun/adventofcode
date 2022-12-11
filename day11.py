@@ -23,7 +23,7 @@ def main():
     monkeys = [Monkey.from_input_lines(input_group) for input_group in input_groups]
     dispatcher = Dispatcher(monkeys)
 
-    Monkey.worry_levels_divided_by_three = False
+    Monkey.worry_levels_divisor = 0  # disable
     Monkey.worry_levels_modulo = math.lcm(*[monkey.test_divisor for monkey in monkeys])  # requires Python 3.9
 
     for i in range(10000):
@@ -50,7 +50,7 @@ class Dispatcher:
 
 
 class Monkey:
-    worry_levels_divided_by_three = True
+    worry_levels_divisor = 3
     worry_levels_modulo = 0
 
     @staticmethod
@@ -85,8 +85,8 @@ class Monkey:
             item = self.items.pop(0)
             self.operation(item)
 
-            if Monkey.worry_levels_divided_by_three:
-                item.worry_level = int(item.worry_level / 3)
+            if Monkey.worry_levels_divisor:
+                item.worry_level = int(item.worry_level / Monkey.worry_levels_divisor)
             if Monkey.worry_levels_modulo:
                 item.worry_level = item.worry_level % Monkey.worry_levels_modulo
 
@@ -98,7 +98,7 @@ class Monkey:
             yield item, target_index
 
 
-def create_operation(expression: str):
+def create_operation(expression: str) -> Callable[[Item], None]:
     code = compile(expression, '<string>', 'eval')
 
     def operation(item: Item):
@@ -107,7 +107,7 @@ def create_operation(expression: str):
     return operation
 
 
-def value_divisible_by(value: int, divisor: int):
+def value_divisible_by(value: int, divisor: int) -> bool:
     return value % divisor == 0
 
 
@@ -120,7 +120,7 @@ class Item:
     def __init__(self, worry_level: int):
         self.worry_level = worry_level
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.worry_level)
 
 
