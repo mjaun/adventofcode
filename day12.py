@@ -10,8 +10,21 @@ from typing import List, NamedTuple, Dict, Iterable, Optional, Set, Tuple
 def main():
     height_map, start_pos, end_pos = parse_input_lines(read_input_lines())
 
+    # part one
     if path := a_star_algorithm(height_map, start_pos, end_pos):
         print(len(path) - 1)
+
+    # part two
+    path_lengths = []
+
+    for position, height in height_map.items():
+        if height != 0:
+            continue
+
+        if path := a_star_algorithm(height_map, position, end_pos):
+            path_lengths.append(len(path) - 1)
+
+    print(min(path_lengths))
 
 
 def a_star_algorithm(height_map: HeightMap, start_pos: Position, end_pos: Position) -> Optional[Path]:
