@@ -1,20 +1,34 @@
 from __future__ import annotations
 
+import functools
 import sys
 
-from enum import Enum, auto
-from typing import Union, List, Tuple
+from enum import IntEnum
+from typing import Union, List, Iterable
 
 PacketItem = Union[int, List['PacketItem']]
 Packet = List[PacketItem]
 
 
 def main():
+    packets = list(read_input_packets())
+
+    # part one
     result = 0
-    for index, pair in enumerate(read_input_pairs()):
-        if compare_packets(pair[0], pair[1]) == CompareResult.CORRECT_ORDER:
-            result += (index + 1)
+    for i in range(int(len(packets) / 2)):
+        if compare_packets(packets[i * 2], packets[i * 2 + 1]) == CompareResult.CORRECT_ORDER:
+            result += i + 1
     print(result)
+
+    # part two
+    divider_packets = [[[2]], [[6]]]
+    packets.extend(divider_packets)
+    sort_packets(packets)
+    divider_indexes = [i + 1 for i, packet in enumerate(packets) if packet in divider_packets]
+    print(divider_indexes[0] * divider_indexes[1])
+
+def sort_packets(packets: List[Packet]):
+    packets.sort(key=functools.cmp_to_key(compare_packets))
 
 
 def compare_packets(lhs: Packet, rhs: Packet) -> CompareResult:
@@ -56,21 +70,19 @@ def compare_integers(lhs: int, rhs: int) -> CompareResult:
         return CompareResult.CONTINUE
 
 
-class CompareResult(Enum):
-    CORRECT_ORDER = auto()
-    WRONG_ORDER = auto()
-    CONTINUE = auto()
+class CompareResult(IntEnum):
+    CORRECT_ORDER = -1
+    WRONG_ORDER = 1
+    CONTINUE = 0
 
 
-def read_input_pairs() -> List[Tuple[Packet, Packet]]:
-    pairs = []
+def read_input_packets() -> Iterable[Packet, Packet]:
     lines = [line.strip() for line in sys.stdin.readlines()]
 
     for i in range(0, len(lines), 3):
         assert len(lines) <= i + 2 or lines[i + 2] == ''
-        pairs.append((eval(lines[i]), eval(lines[i + 1])))
-
-    return pairs
+        yield eval(lines[i])
+        yield eval(lines[i + 1])
 
 
 if __name__ == '__main__':
