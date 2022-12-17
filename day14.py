@@ -3,19 +3,33 @@ from __future__ import annotations
 import sys
 
 from enum import Flag, auto, Enum
-from typing import NamedTuple, List, Dict
+from typing import NamedTuple, List, Dict, Optional
 
 
 def main():
     rock_paths = read_input()
-    material_map = MaterialMap(rock_paths)
-    pour_from_position = Position(500, 0)
 
+    # part one
+    material_map = MaterialMap(rock_paths)
     sand_units = 0
-    while material_map.pour_sand(pour_from_position) == PourSandResult.SAND_CAME_TO_REST:
+
+    while position := material_map.pour_sand():
+        if position.y > material_map.lowest_rock_y:
+            break
+
         sand_units += 1
 
     print(sand_units)
+
+    # part two
+    material_map = MaterialMap(rock_paths)
+    sand_units = 0
+
+    while position := material_map.pour_sand():
+        sand_units += 1
+
+    print(sand_units)
+
 
 
 class MaterialMap:
@@ -35,33 +49,30 @@ class MaterialMap:
             for i in range(len(rock_path) - 1):
                 fill_rock_line(rock_path[i], rock_path[i + 1])
 
-        self.bottom_y = max(position.y for position in self.materials.keys())
+        self.lowest_rock_y = max(position.y for position in self.materials.keys())
+        self.floor_y = self.lowest_rock_y + 2
 
-    def pour_sand(self, start_position: Position) -> PourSandResult:
-        current_position = start_position
+    def pour_sand(self) -> Optional[Position]:
+        current_position = Position(500, 0)
 
-        while current_position.y < self.bottom_y:
+        if current_position in self.materials:
+            return None
+
+        while True:
             directions = [Direction.DOWN, Direction.DOWN | Direction.LEFT, Direction.DOWN | Direction.RIGHT]
-            next_positions = [current_position.next(direction) for direction in directions]
+            next_positions = (current_position.next(direction) for direction in directions)
             next_position = next(filter(lambda position: position not in self.materials, next_positions), None)
 
-            if not next_position:
+            if not next_position or next_position.y == self.floor_y:
                 self.materials[current_position] = Material.SAND
-                return PourSandResult.SAND_CAME_TO_REST
+                return current_position
 
             current_position = next_position
-
-        return PourSandResult.SAND_FALLS_INFINITELY
 
 
 class Material(Enum):
     ROCK = auto()
     SAND = auto()
-
-
-class PourSandResult(Enum):
-    SAND_CAME_TO_REST = auto()
-    SAND_FALLS_INFINITELY = auto()
 
 
 class Position(NamedTuple):
